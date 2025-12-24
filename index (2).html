@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Green and Clear Skies</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+(function(){
+  emailjs.init("YOUR_PUBLIC_KEY"); // ← replace later
+})();
+</script>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  color:white;
+  text-align:center;
+  background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470') no-repeat center/cover fixed;
+}
+.blur{backdrop-filter: blur(5px); min-height:100vh; padding:30px;}
+.page{display:none;}
+.page.active{display:block;}
+
+button{
+  padding:12px 25px;
+  margin:10px;
+  font-size:16px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.green{background:#2ecc71;color:white;}
+.white{background:white;color:black;}
+
+input{
+  padding:10px;
+  margin:8px;
+  width:80%;
+  max-width:300px;
+}
+.columns{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  flex-wrap:wrap;
+}
+.column{
+  background:rgba(0,0,0,0.5);
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+  text-align:left;
+}
+.small{font-size:14px;color:#ddd;}
+</style>
+</head>
+
+<body>
+<div class="blur">
+
+<!-- PAGE 1 -->
+<div class="page active" id="p1">
+<h3>Only available in Ahmedabad and Gandhinagar</h3>
+<h1>Hello, welcome to Green and Clear Skies</h1>
+<p class="small">Coding is intelligence</p>
+<h2>Would you like to visit our website?</h2>
+<button class="green" onclick="go(2)">Yes</button>
+<button class="white" onclick="alert('Have a nice day! Bye!')">No</button>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="p2">
+<h1>Your Details</h1>
+<input id="name" placeholder="Name (required)">
+<input id="address" placeholder="Address (required)">
+<input id="phone" placeholder="Phone (required)">
+<br>
+<button class="green" onclick="checkDetails()">Continue</button>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page" id="p3">
+<h1>What would you like to order?</h1>
+
+<div class="columns">
+<div class="column">
+<h2>Materials</h2>
+<label><input type="checkbox" value="Arduino Uno - ₹350" data-price="350"> Arduino Uno (₹350)</label><br>
+<label><input type="checkbox" value="Servo Motor - ₹200" data-price="200"> Servo Motor (₹200)</label><br>
+<label><input type="checkbox" value="LDR Sensor - ₹170" data-price="170"> LDR Sensor (₹170)</label><br>
+<label><input type="checkbox" value="Ultrasonic Sensor - ₹150" data-price="150"> Ultrasonic Sensor (₹150)</label><br>
+<label><input type="checkbox" value="Jumper Wire Set - ₹110" data-price="110"> Jumper Wire Set (₹110)</label><br>
+<label><input type="checkbox" value="LCD Display - ₹300" data-price="300"> LCD Display (₹300)</label><br>
+<label><input type="checkbox" value="LED Small - ₹5" data-price="5"> LED Small (₹5)</label>
+</div>
+
+<div class="column">
+<h2>Ready-Made Projects</h2>
+<label><input type="checkbox" value="Working Radar - ₹600" data-price="600"> Working Radar (₹600)</label><br>
+<label><input type="checkbox" value="Automatic Dustbin - ₹500" data-price="500"> Automatic Dustbin (₹500)</label><br>
+<label><input type="checkbox" value="Customized LCD LED - ₹400" data-price="400"> Customized LCD LED (₹400)</label>
+</div>
+</div>
+
+<button class="green" onclick="makeSummary()">Continue</button>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page" id="p4">
+<h1>Order Summary</h1>
+<div id="summary"></div>
+<h2 id="total"></h2>
+<button class="green" onclick="go(5)">Continue</button>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page" id="p5">
+<h1>Payment Method</h1>
+<h2>Cash on Delivery</h2>
+<p id="finalPrice"></p>
+<h3>Should I proceed your order?</h3>
+<button class="green" onclick="sendOrder()">Yes</button>
+<button class="white" onclick="go(1)">No</button>
+</div>
+
+<!-- PAGE 6 -->
+<div class="page" id="p6">
+<h1>✔ Order Placed</h1>
+<p>Your order will arrive in 4–5 days.</p>
+<p>Have a nice day!</p>
+</div>
+
+</div>
+
+<script>
+let items=[], totalPrice=0;
+
+function go(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+n).classList.add('active');
+}
+
+function checkDetails(){
+  if(!name.value || !address.value || !phone.value){
+    alert("All fields are required");
+    return;
+  }
+  go(3);
+}
+
+function makeSummary(){
+  items=[];
+  totalPrice=0;
+  document.querySelectorAll('input[type=checkbox]:checked').forEach(i=>{
+    items.push(i.value);
+    totalPrice += Number(i.dataset.price);
+  });
+
+  if(items.length===0){
+    alert("Please select at least one item");
+    return;
+  }
+
+  document.getElementById("summary").innerHTML = items.join("<br>");
+  document.getElementById("total").innerText = "Total: ₹"+totalPrice;
+  document.getElementById("finalPrice").innerText = "Total Amount: ₹"+totalPrice;
+  go(4);
+}
+
+function sendOrder(){
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+    name:name.value,
+    address:address.value,
+    phone:phone.value,
+    order:items.join(", "),
+    total:totalPrice
+  });
+  go(6);
+}
+</script>
+
+</body>
+</html>
